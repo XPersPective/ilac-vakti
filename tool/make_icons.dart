@@ -172,5 +172,45 @@ void main() {
         File(entry.key).writeAsBytesSync(encoded[entry.value]!, flush: true);
       }
     }
+    for (final entry in targets.entries) {
+      final file = File(entry.key);
+      expect(
+        file.existsSync(),
+        isTrue,
+        reason: 'Native icon missing: ${entry.key}',
+      );
+      expect(File(file.resolveSymbolicLinksSync()).uri, file.absolute.uri);
+      expect(file.lengthSync(), inInclusiveRange(33, 6 * 1024 * 1024));
+      final png = file.readAsBytesSync();
+      expect(png.length, greaterThanOrEqualTo(33));
+      expect(png.take(8), [137, 80, 78, 71, 13, 10, 26, 10]);
+      expect(png.sublist(24, 26), [8, 2], reason: 'Native icon must be RGB24');
+      final header = ByteData.sublistView(png);
+      expect(header.getUint32(16), entry.value);
+      expect(header.getUint32(20), entry.value);
+      final codec = await ui.instantiateImageCodec(png);
+      final frame = await codec.getNextFrame();
+      expect(frame.image.width, entry.value);
+      expect(frame.image.height, entry.value);
+      final rgba = (await frame.image.toByteData(
+        format: ui.ImageByteFormat.rawRgba,
+      ))!.buffer.asUint8List();
+      frame.image.dispose();
+      codec.dispose();
+      expect(rgba.take(3), [
+        0,
+        107,
+        96,
+      ], reason: 'Native icon brand background');
+      var creamFound = false;
+      var opaque = true;
+      for (var i = 0; i < rgba.length; i += 4) {
+        opaque &= rgba[i + 3] == 255;
+        creamFound |=
+            rgba[i] == 247 && rgba[i + 1] == 246 && rgba[i + 2] == 240;
+      }
+      expect(opaque, isTrue, reason: 'Native icon must be opaque');
+      expect(creamFound, isTrue, reason: 'Native icon capsule missing');
+    }
   });
 }

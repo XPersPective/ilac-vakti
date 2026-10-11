@@ -28,6 +28,23 @@ MedicinePlan plan(
 );
 
 void main() {
+  test(
+    'native GMT and legacy IANA aliases resolve without altering offsets',
+    () {
+      expect(locationForZone('GMT').currentTimeZone.offset, Duration.zero);
+      expect(locationForZone('UTC').currentTimeZone.offset, Duration.zero);
+      expect(locationForZone('US/Eastern').name, 'US/Eastern');
+      final patient = Patient(name: 'Synthetic GMT person');
+      final schedule = plan(patient, zone: 'GMT', daily: [150]);
+      final first = schedule
+          .occurrences(schedule.startUtc, schedule.endUtc)
+          .first;
+      expect(first.scheduledAtUtc, utc('2026-03-28T02:30:00Z'));
+      expect(MedicinePlan.fromJson(schedule.toJson()).timeZone, 'GMT');
+      expect(() => locationForZone('Missing/Zone'), throwsFormatException);
+    },
+  );
+
   test('clear accidental confirmation preserves audit without inventing a skipped dose', () {
     final patient = Patient(name: 'Synthetic person');
     final schedule = plan(patient, interval: 480);

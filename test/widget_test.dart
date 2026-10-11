@@ -56,6 +56,29 @@ MedicinePlan existingPlan(Patient p) => MedicinePlan(
 );
 
 void main() {
+  testWidgets('GMT native controller renders after domain initialization', (
+    tester,
+  ) async {
+    final patient = Patient(name: 'Synthetic GMT person');
+    final plan = MedicinePlan(
+      patientId: patient.id,
+      name: 'Synthetic GMT medicine',
+      dose: 'Entered dose',
+      confirmed: true,
+      startUtc: DateTime.utc(2026, 10, 11),
+      endUtc: DateTime.utc(2026, 10, 12),
+      timeZone: 'GMT',
+      dailyMinutes: [600],
+    );
+    final c = AppController(
+      initial: AppData(patients: [patient], plans: [plan]),
+      persist: (_) async {},
+      timeZone: 'GMT',
+    );
+    await launch(tester, c);
+    expect(find.textContaining('Synthetic GMT person'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
   testWidgets(
     'overflow retains person filter so a smaller history can be selected',
     (tester) async {

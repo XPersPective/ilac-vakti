@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:timezone/data/latest.dart' as tzdata;
+import 'package:timezone/data/latest_all.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 String newId() {
@@ -58,7 +58,7 @@ List<dynamic> _list(Object? value, int max) {
 }
 
 bool _zonesReady = false;
-tz.Location _location(String name) {
+tz.Location locationForZone(String name) {
   if (!_zonesReady) {
     tzdata.initializeTimeZones();
     _zonesReady = true;
@@ -115,7 +115,7 @@ class MedicinePlan {
        endUtc = _utc(endUtc),
        closedAtUtc = closedAtUtc == null ? null : _utc(closedAtUtc),
        dailyMinutes = List.unmodifiable([...dailyMinutes]..sort()) {
-    _location(timeZone);
+    locationForZone(timeZone);
     if (!confirmed ||
         !endUtc.isAfter(startUtc) ||
         endUtc.difference(startUtc) > const Duration(days: 3660) ||
@@ -190,7 +190,7 @@ class MedicinePlan {
         date = date.add(Duration(microseconds: step));
       }
     } else {
-      final location = _location(timeZone);
+      final location = locationForZone(timeZone);
       final first = tz.TZDateTime.from(from, location);
       final last = tz.TZDateTime.from(to, location);
       var day = DateTime.utc(first.year, first.month, first.day);

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:timezone/data/latest.dart' as tzdata;
 
 import 'controller.dart';
 import 'domain.dart';
@@ -12,7 +11,6 @@ import 'ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  tzdata.initializeTimeZones();
   await _openApp();
 }
 
@@ -34,7 +32,9 @@ Future<void> _openApp() async {
     await protectRecordFiles();
     var zone = 'Europe/Istanbul';
     try {
-      zone = (await FlutterTimezone.getLocalTimezone()).identifier;
+      zone = locationForZone(
+        (await FlutterTimezone.getLocalTimezone()).identifier,
+      ).name;
     } catch (_) {
       // Each plan form exposes its IANA zone for explicit user confirmation.
     }

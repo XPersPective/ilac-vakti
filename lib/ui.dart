@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:timezone/data/latest.dart' as tzdata;
 import 'package:timezone/timezone.dart' as tz;
 
 import 'controller.dart';
@@ -28,12 +27,6 @@ class IlacVaktiApp extends StatefulWidget {
 }
 
 class _IlacVaktiAppState extends State<IlacVaktiApp> {
-  @override
-  void initState() {
-    super.initState();
-    tzdata.initializeTimeZones();
-  }
-
   ThemeData theme(Brightness brightness) {
     final scheme = ColorScheme.fromSeed(
       seedColor: const Color(0xff006b60),
@@ -122,12 +115,12 @@ class _HomeState extends State<_Home> {
   String t(String tr, String en) => data.language == 'tr' ? tr : en;
   bool get busy => c.busy || externalBusy;
   String clock(DateTime date, String zone) {
-    final local = tz.TZDateTime.from(date, tz.getLocation(zone));
+    final local = tz.TZDateTime.from(date, locationForZone(zone));
     return '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
 
   String date(DateTime value, String zone) {
-    final local = tz.TZDateTime.from(value, tz.getLocation(zone));
+    final local = tz.TZDateTime.from(value, locationForZone(zone));
     return '${local.day.toString().padLeft(2, '0')}.${local.month.toString().padLeft(2, '0')}.${local.year}';
   }
 
@@ -341,15 +334,15 @@ class _HomeState extends State<_Home> {
   );
   Widget today() {
     final instant = now;
-    final local = tz.TZDateTime.from(instant, tz.getLocation(c.timeZone));
+    final local = tz.TZDateTime.from(instant, locationForZone(c.timeZone));
     final from = tz.TZDateTime(
-      tz.getLocation(c.timeZone),
+      locationForZone(c.timeZone),
       local.year,
       local.month,
       local.day,
     ).toUtc();
     final to = tz.TZDateTime(
-      tz.getLocation(c.timeZone),
+      locationForZone(c.timeZone),
       local.year,
       local.month,
       local.day + 1,
@@ -1157,7 +1150,7 @@ class _PlanEditorState extends State<_PlanEditor> {
     final p = widget.plan;
     final local = tz.TZDateTime.from(
       now.add(const Duration(minutes: 1)),
-      tz.getLocation(p?.timeZone ?? c.timeZone),
+      locationForZone(p?.timeZone ?? c.timeZone),
     );
     name = TextEditingController(text: p?.name ?? '');
     dose = TextEditingController(text: p?.dose ?? '');
@@ -1214,7 +1207,7 @@ class _PlanEditorState extends State<_PlanEditor> {
     try {
       final parts = List.generate(5, (i) => int.parse(m.group(i + 1)!));
       final local = tz.TZDateTime(
-        tz.getLocation(zone.text.trim()),
+        locationForZone(zone.text.trim()),
         parts[0],
         parts[1],
         parts[2],
@@ -1279,7 +1272,10 @@ class _PlanEditorState extends State<_PlanEditor> {
     final ok = await c.change((data) {
       final begin = parseStart()!;
       final days = int.parse(duration.text);
-      final local = tz.TZDateTime.from(begin, tz.getLocation(zone.text.trim()));
+      final local = tz.TZDateTime.from(
+        begin,
+        locationForZone(zone.text.trim()),
+      );
       final end = elapsed
           ? begin.add(Duration(days: days))
           : tz.TZDateTime(
@@ -1486,7 +1482,7 @@ class _PlanEditorState extends State<_PlanEditor> {
                   max: 100,
                   validator: (v) {
                     try {
-                      tz.getLocation(v?.trim() ?? '');
+                      locationForZone(v?.trim() ?? '');
                       return null;
                     } catch (_) {
                       return t(
