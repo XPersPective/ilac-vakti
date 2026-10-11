@@ -12,6 +12,7 @@
 - `lib/platform.dart` — fixed native private directory/protection, bounded encrypted import and explicit native share chooser.
 - `android/`, `ios/` — scoped storage/backup protection, permissions/receivers, iOS15.5 scene-compatible channels; native build/QA pending.
 - `.project-brain/` — this app's own plan; `pubspec.lock` — public dependency graph.
+- `.github/workflows/ios-simulator.yml` — public standard macOS opt-in, bounded synthetic PNG transport through job logs; actual run pending.
 ## Domains
 ### app
 Status: VERIFIED
