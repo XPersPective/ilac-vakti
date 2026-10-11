@@ -12,7 +12,9 @@
 - `lib/platform.dart` — fixed native private directory/protection, bounded encrypted import and explicit native share chooser.
 - `android/`, `ios/` — scoped storage/backup protection, permissions/receivers, iOS15.5 scene-compatible channels; native build/QA pending.
 - `.project-brain/` — this app's own plan; `pubspec.lock` — public dependency graph.
-- `.github/workflows/ios-simulator.yml` — public standard macOS opt-in, bounded synthetic PNG transport through job logs; actual run pending.
+- `tool/make_icons.dart`, `docs/icon-design.md` — original opaque Android/iOS marks with runnable generator check.
+- `README.md` — current app usage, verification commands and limits.
+- `.github/workflows/ios-simulator.yml` — public standard macOS opt-in, bounded synthetic PNG transport through job logs; actual first run failed MLKit arm64 simulator link; Intel standard runner selected pending successful run.
 ## Domains
 ### app
 Status: VERIFIED
@@ -23,6 +25,6 @@ Sources: `lib/**`, `test/**`, `android/**`, `ios/**`, `pubspec.yaml`, `docs/**`,
 - Snapshot bounded1MiB, query366days/10000occurrences; UI/OCR/native reminder/share/protection wiring implemented. Today50-card pagination, history summary all selected occurrences with latest100 list explicitly labeled. Generic64 upcoming notifications share a7day horizon; partial failure/permissions show actual coverage, background refill not guaranteed.
 ## Known Unknowns
 - Store identity/signing/health declarations and physical-device acceptance remain release gates.
-- Public standard GitHub macOS runner iOS simulator execution not yet performed; no private core dependency.
+- First public standard macOS run passed46tests but failed native linker; exact vendor arm64 exclusion diagnosed, Intel rerun pending; no private core dependency.
 - Native KeyStore/Keychain behavior and actual power-loss recovery are not proved by synthetic file tests.
-- Android APK build and runtime acceptance remain pending; Windows cross-drive Kotlin cache disabled with bounded Gradle resources. Swift/iOS CI not yet run.
+- Android preliminary debug APK build PASS; final icons build/native runtime acceptance pending. Windows cross-drive Kotlin cache disabled with bounded Gradle resources. Actual iOS first run failed linker; no successful compile claimed.

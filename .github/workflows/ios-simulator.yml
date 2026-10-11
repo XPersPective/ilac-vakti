@@ -22,7 +22,8 @@ jobs:
   simulator:
     # Approves public source/synthetic screenshots, not private quota or billing.
     if: ${{ github.event.repository.private == false && vars.STORE_AUTOMATION_PUBLIC_CI_APPROVED == 'true' }}
-    runs-on: macos-latest
+    # ponytail: ML Kit 9 ships x86_64 simulator slices; use standard Intel until vendor supports arm64 simulators.
+    runs-on: macos-15-intel
     timeout-minutes: 30
     env:
       APP_PATH: ${{ inputs.app_path }}
@@ -55,9 +56,9 @@ jobs:
         run: |
           flutter --version
           flutter pub get
-          flutter analyze --fatal-infos
+          flutter analyze --fatal-infos --fatal-warnings
           flutter test
-          flutter build ios --simulator --debug --no-codesign
+          flutter build ios --simulator --debug --no-codesign --verbose
       - name: Select available iPhone and identify the actual build
         working-directory: ${{ env.APP_ROOT }}
         run: |
