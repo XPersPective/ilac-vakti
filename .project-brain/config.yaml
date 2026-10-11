@@ -1,0 +1,11 @@
+schema_version: 4
+architecture:
+  mode: single
+git:
+  history_mode: full
+  commit: auto
+  push: manual
+commands:
+  test: 'flutter test'
+  lint: 'flutter analyze --fatal-infos --fatal-warnings'
+  build: 'flutter build apk --debug'
