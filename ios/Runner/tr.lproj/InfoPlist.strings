@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "İlaç Vakti";
+"NSCameraUsageDescription" = "İlaç etiketinin fotoğrafından cihazda yalnızca sizin doğrulayacağınız bir metin taslağı okumak için kamera kullanılır.";
+"NSPhotoLibraryUsageDescription" = "Seçtiğiniz ilaç fotoğrafından cihazda doğrulanmamış bir metin taslağı okumak için kullanılır.";

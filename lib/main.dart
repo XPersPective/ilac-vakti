@@ -1,33 +1,37 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:timezone/data/latest.dart' as tzdata;
 
 import 'controller.dart';
 import 'domain.dart';
 import 'photo.dart';
+import 'platform.dart';
+import 'notifications.dart';
 import 'storage.dart';
 import 'ui.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  tzdata.initializeTimeZones();
   await _openApp();
 }
 
 bool _opening = false;
+ReminderService? _activeReminders;
 
 Future<void> _openApp() async {
   if (_opening) return;
   _opening = true;
+  await _activeReminders?.dispose();
+  _activeReminders = null;
   try {
-    final support = await getApplicationSupportDirectory();
-    final directory = Directory('${support.path}/private-records');
+    final directory = await privateRecordDirectory();
     final store = RecordStore.device(
       directory,
       (value) => AppData.fromJson(value),
     );
     final records = await store.load();
+    await protectRecordFiles();
     var zone = 'Europe/Istanbul';
     try {
       zone = (await FlutterTimezone.getLocalTimezone()).identifier;
@@ -36,12 +40,38 @@ Future<void> _openApp() async {
     }
     final controller = AppController(
       initial: records == null ? AppData.empty() : AppData.fromJson(records),
-      persist: (data) => store.save(data.toJson()),
+      persist: (data) async {
+        await protectRecordFiles();
+        await store.save(data.toJson());
+        try {
+          await protectRecordFiles();
+        } catch (_) {
+          // Encrypted write committed: stop this UI instead of continuing from stale state.
+          await _activeReminders?.dispose();
+          _activeReminders = null;
+          runApp(const LockedRecordsApp());
+          rethrow;
+        }
+      },
       store: store,
       timeZone: zone,
       recovered: store.recovered,
     );
-    runApp(IlacVaktiApp(controller: controller, readPhoto: readMedicinePhoto));
+    final reminders = ReminderService(controller);
+    _activeReminders = reminders;
+    try {
+      await reminders.initialize();
+    } catch (_) {
+      controller.reminderWarning = 'platform_unavailable';
+    }
+    runApp(
+      IlacVaktiApp(
+        controller: controller,
+        readPhoto: readMedicinePhoto,
+        onExport: (password) => shareEncryptedBackup(controller, password),
+        onImport: (password) => chooseEncryptedBackup(controller, password),
+      ),
+    );
   } catch (_) {
     runApp(const LockedRecordsApp());
   } finally {

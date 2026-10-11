@@ -7,7 +7,11 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Ilac Vakti</string>
+	<string>İlaç Vakti</string>
+	<key>NSCameraUsageDescription</key>
+	<string>İlaç etiketinin fotoğrafından yalnızca sizin doğrulayacağınız bir metin taslağı okumak için kamera kullanılır.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Seçtiğiniz ilaç fotoğrafından cihazda doğrulanmamış bir metin taslağı okumak için kullanılır.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>

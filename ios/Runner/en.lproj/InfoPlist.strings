@@ -1,0 +1,3 @@
+"CFBundleDisplayName" = "İlaç Vakti";
+"NSCameraUsageDescription" = "Use the camera to read an unverified medicine-label text draft on this device. You must check and confirm it.";
+"NSPhotoLibraryUsageDescription" = "Read an unverified text draft from a medicine photo you select, on this device.";
