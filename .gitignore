@@ -50,6 +50,7 @@ app.*.map.json
 # Local execution and sensitive device/backup material never belong in source.
 .factory/runs/
 .factory/artifacts/
+android/.kotlin/
 *.ivault
 *.ilacbackup
 *.jks
