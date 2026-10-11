@@ -28,6 +28,47 @@ MedicinePlan plan(
 );
 
 void main() {
+  test('clear accidental confirmation preserves audit without inventing a skipped dose', () {
+    final patient = Patient(name: 'Synthetic person');
+    final schedule = plan(patient, interval: 480);
+    var data = AppData(patients: [patient], plans: [schedule]);
+    final occurrence = schedule
+        .occurrences(schedule.startUtc, schedule.endUtc)
+        .first;
+    data = data.record(occurrence, ConfirmationStatus.taken, schedule.startUtc);
+    final cleared = data.record(
+      occurrence,
+      ConfirmationStatus.unrecorded,
+      schedule.startUtc.add(const Duration(minutes: 1)),
+    );
+    expect(cleared.statusFor(occurrence.id), isNull);
+    expect(cleared.events.map((event) => event.status), [
+      ConfirmationStatus.taken,
+      ConfirmationStatus.unrecorded,
+    ]);
+    expect(
+      identical(
+        cleared.record(
+          occurrence,
+          ConfirmationStatus.unrecorded,
+          schedule.startUtc.add(const Duration(minutes: 2)),
+        ),
+        cleared,
+      ),
+      isTrue,
+    );
+    expect(AppData.fromJson(cleared.toJson()).statusFor(occurrence.id), isNull);
+    expect(
+      cleared
+          .record(
+            occurrence,
+            ConfirmationStatus.skipped,
+            schedule.startUtc.add(const Duration(minutes: 3)),
+          )
+          .statusFor(occurrence.id),
+      ConfirmationStatus.skipped,
+    );
+  });
   test('close validates timestamp before clamping to plan end', () {
     final p = plan(Patient(name: 'A'));
     expect(() => p.close(DateTime(2300)), throwsFormatException);

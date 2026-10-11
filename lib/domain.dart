@@ -326,7 +326,7 @@ class Occurrence {
   }
 }
 
-enum ConfirmationStatus { taken, skipped }
+enum ConfirmationStatus { taken, skipped, unrecorded }
 
 class ConfirmationEvent {
   ConfirmationEvent({
@@ -418,6 +418,9 @@ class AppData {
       final plan = schedules['${occurrence.planId}:${occurrence.planRevision}'];
       if (plan == null || !plan.contains(occurrence)) _invalid();
       final old = lastEvents[event.occurrenceId];
+      if (old == null && event.status == ConfirmationStatus.unrecorded) {
+        _invalid();
+      }
       if (old != null &&
           (event.recordedAtUtc.isBefore(old.recordedAtUtc) ||
               event.status == old.status)) {
@@ -521,7 +524,11 @@ class AppData {
       List.unmodifiable(plans.where((p) => p.patientId == patientId));
   ConfirmationStatus? statusFor(String occurrenceId) {
     for (final event in events.reversed) {
-      if (event.occurrenceId == occurrenceId) return event.status;
+      if (event.occurrenceId == occurrenceId) {
+        return event.status == ConfirmationStatus.unrecorded
+            ? null
+            : event.status;
+      }
     }
     return null;
   }
@@ -536,7 +543,10 @@ class AppData {
       status: status,
       recordedAtUtc: atUtc,
     );
-    if (statusFor(occurrence.id) == status) return this;
+    if (statusFor(occurrence.id) ==
+        (status == ConfirmationStatus.unrecorded ? null : status)) {
+      return this;
+    }
     return _next(events: [...events, event]);
   }
 
